@@ -1,0 +1,766 @@
+SHADOW MODULE SUITE - ALL IN ONE
+==============================================================================
+Version      : v1.0.0
+Modules      : 146
+Target       : Poco M2 Pro (beryllium)
+Chipset      : Snapdragon 660 (SDM660) - Adreno 512 GPU - 4 GB / 6 GB RAM
+Root         : KernelSU (also works with Magisk)
+ROMs         : Custom ROMs (LineageOS, crDroid, Pixel Experience, AOSP,
+                MIUI based, Evolution X, Infinity X ...)
+Built        : 2026-10-18
+
+WHAT THIS ZIP DOES
+------------------------------------------------------------------------------
+One flashable ZIP that installs 146 tuned modules on your rooted
+Poco M2 Pro. Every module is named SHADOW_<Module> and lives in its own
+folder inside /data/adb/modules, so you can switch any single one of them
+on or off from the KernelSU app at any time.
+
+Nothing in this pack is guessed blindly: every module walks the real sysfs
+and proc nodes of the running kernel and writes only to the nodes that
+actually exist. When your custom ROM does not expose a knob, the module
+logs "skip" and moves on. Nothing breaks, nothing reboots by itself.
+
+THE THREE THINGS YOU ASKED FOR
+------------------------------------------------------------------------------
+1. GAMING
+   Shadow_GamingBoost, Shadow_GamingGPUBoost, Shadow_GamingStutterFix,
+   Shadow_GamingCPUMinFreq, Shadow_GamingFPSUnlock and the rest of the
+   Gaming group pin the CPU, unlock the Adreno 512, remove the frame
+   drops and lower the network latency.
+
+2. TOUCH ENHANCER
+   Shadow_TouchEnhancer raises the panel sampling rate, sharpens the touch
+   response, enables palm rejection, kills ghost touches and protects the
+   screen edges while you hold the phone in landscape.
+
+3. FAST CHARGING + ULTRA BATTERY BACKUP
+   Shadow_FastCharge raises the charge current ceiling and the voltage
+   limit, Shadow_ChargeCurrentMax / Shadow_ChargeVoltageMax do it on
+   their own and Shadow_ChargeSmartCharge tapers the last 30 percent so
+   the battery is not stressed.
+   Shadow_UltraBatteryBackup is the battery backup: it takes every one of
+   your apps out of Doze, out of the app standby bucket and out of the
+   background restriction, then repeats the whole list every 10 minutes,
+   so nothing of yours is ever killed or restarted. It is always active,
+   in every profile.
+
+PROFILES
+------------------------------------------------------------------------------
+The whole suite follows one profile. Switch it any time with:
+
+    sh /data/adb/shadow/control.sh profile gaming
+    sh /data/adb/shadow/control.sh profile performance
+    sh /data/adb/shadow/control.sh profile balanced
+    sh /data/adb/shadow/control.sh profile battery
+
+    gaming      130 modules enabled
+    performance 130 modules enabled
+    balanced    116 modules enabled
+    battery      98 modules enabled
+
+    8 modules are always on (the battery backup, the doze killer, the
+    background release and the control centre), independent of the profile.
+
+GROUPS AT A GLANCE
+------------------------------------------------------------------------------
+    Audio          6 modules   latency, quality, volume, mixer
+    Battery       18 modules   Doze, standby, background, battery backup
+    Charge        14 modules   charge current, voltage, fast charge
+    Display        8 modules   refresh rate, brightness, colour
+    GPU            8 modules   Adreno 512 clock, power level, governor
+    Gaming        18 modules   FPS, frame drops, GPU clock, latency
+    Network       12 modules   TCP, DNS, WiFi, ad blocking
+    Performance   12 modules   CPU governor, frequency, core parking
+    Privacy        8 modules   bloat apps, telemetry, app permissions
+    System        10 modules   animations, dark mode, split screen, UI
+    Thermal        6 modules   trip points, throttling, temperatures
+    Tools         12 modules   profile switcher, dashboard, cleaner
+    Touch         14 modules   sampling rate, palm rejection, ghost touch
+
+INSTALL
+------------------------------------------------------------------------------
+    1. Copy SHADOW_AllInOne_v1.0.0.zip to the phone.
+    2. KernelSU app -> Modules -> Install from storage -> pick the zip.
+       (Magisk app -> Modules -> Install from storage -> pick the zip)
+    3. Reboot.
+    4. Open the KernelSU app, the Modules tab, and you will see every
+       SHADOW module listed on its own. Tap the action button of
+       SHADOW_ControlCenter for the dashboard.
+
+No metamodule is required. The pack uses scripts and properties only, so
+it works on a plain KernelSU install with overlayfs support or without it.
+
+The zip also contains 146 individual module zips in shadow_individual/ if
+you would rather flash one module at a time.
+
+IF SOMETHING GOES WRONG
+------------------------------------------------------------------------------
+    * Every module is a normal KernelSU module: disable it in the app and
+      reboot, or remove it completely, no system wipe needed.
+    * Shadow_BootLoopGuard watches the boot counter. If the phone fails
+      to boot three times in a row it disables the risky modules by
+      itself and lets the phone come back.
+    * A full reset of the suite: remove SHADOW_AllInOne and every other
+      SHADOW module from the KernelSU app, then reboot.
+
+LOGS
+------------------------------------------------------------------------------
+    /data/adb/shadow/shadow.log         the log of every module
+    /data/adb/shadow/battery.log        battery history
+    /data/adb/shadow/charge.log         charge current history
+    /data/adb/shadow/monitor.log        live cpu / gpu / temperature
+    /data/adb/shadow/cpu.log            cpu frequency tables
+    /data/adb/shadow/thermal.log        thermal zone temperatures
+    /data/adb/shadow/system_report.txt  device and selinux report
+
+THE 146 MODULES
+==============================================================================
+
+AUDIO  (6 modules)
+------------------------------------------------------------------------------
+  SHADOW_AudioLowLatency
+      Cuts the audio path delay: the system sound effects are switched off and
+      the vendor audio HAL is told to use the fast path.
+      group: Audio   profiles: gaming,performance,balanced
+  SHADOW_DolbyAtmos
+      Enables the Dolby Atmos and HiFi audio engines on MIUI based custom ROMs
+      so the phone gets the full sound effect pipeline.
+      group: Audio   profiles: gaming,performance,balanced,battery
+  SHADOW_HiFiAudio
+      High fidelity output: raises the Opus bitrate and asks the HAL for the
+      highest quality stream so music and games sound exactly as recorded.
+      group: Audio   profiles: gaming,performance,balanced,battery
+  SHADOW_MicNoiseCancel
+      Improves the microphone during calls: enables the vendor noise
+      suppression and the high quality voice path so the other side hears you
+      clearly.
+      group: Audio   profiles: gaming,performance,balanced,battery
+  SHADOW_SoundDefaults
+      Balances every sound channel to sane levels: media, ringtone, alarm,
+      notification, DTMF tones and touch sounds.
+      group: Audio   profiles: gaming,performance,balanced,battery
+  SHADOW_VolumeBoost
+      Pushes the media volume past the 100 percent limit using the built in
+      volume booster, so the speaker is clearly louder.
+      group: Audio   profiles: gaming,performance,balanced,battery
+
+BATTERY  (18 modules)
+------------------------------------------------------------------------------
+  SHADOW_AppStandbyKill
+      Moves every installed app out of the rarely used bucket so Android never
+      freezes your apps in the background.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_AutoSyncTrim
+      Turns the automatic account sync off. Your mail and photos stop syncing
+      in the background and the idle drain disappears.
+      group: Battery   profiles: battery,balanced
+  SHADOW_BackgroundFreeze
+      Releases the background restriction and allows every app to run in the
+      background. This is the second half of the full battery backup.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_BatteryHistory
+      Records the battery level, temperature, voltage and current every five
+      minutes into battery.log for a full history of your battery.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_BatteryLifeExtender
+      The classic battery life bundle: bigger ZRAM, tuned memory reclaim, no
+      background sync storm, half animations and a warm standby bucket.
+      group: Battery   profiles: battery,balanced
+  SHADOW_BatterySaverPro
+      Aggressive battery saver: low power mode, powersave CPU governor, small
+      ZRAM and reduced background work. Built for the battery profile.
+      group: Battery   profiles: battery,balanced
+  SHADOW_BatterySmartSaver
+      Smart saver: switches low power mode on by itself when the battery falls
+      under 20 percent and switches it back off once the phone is charged
+      above 40 percent.
+      group: Battery   profiles: battery,balanced
+  SHADOW_BatteryStats
+      Dumps the full battery statistics into battery_stats.txt so you can see
+      which app is really eating your charge.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_BluetoothDrain
+      Stops the Bluetooth stack from scanning in the background, which is one
+      of the biggest silent battery drainers on custom ROMs.
+      group: Battery   profiles: battery,balanced
+  SHADOW_DozeKiller
+      Keeps Doze in its unforced state and makes sure no system component can
+      push it into deep sleep, so your apps stay exactly where you left them.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_DozePolicy
+      Profile aware Doze control: Doze stays out of the way while you game,
+      and is pushed back to its most aggressive state on the battery profile.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_ExactAlarm
+      Gives the clock, alarm and calendar apps the exact alarm permission so
+      your alarms still ring on time on a locked custom ROM.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_LocationDrain
+      Limits the location apps to foreground only, so a chatty app can no
+      longer keep the GPS warm all day in your pocket.
+      group: Battery   profiles: battery,balanced
+  SHADOW_NotificationDrain
+      Cuts the heads up notifications and the background notification work
+      that wakes the display for no reason.
+      group: Battery   profiles: battery,balanced
+  SHADOW_UltraBatteryBackup
+      The flagship battery backup. Every one of your apps is removed from
+      Doze, from the app standby bucket and from the background restriction,
+      so nothing of yours is ever killed or restarted. The whole list is
+      refreshed every 10 minutes, which makes the backup hold even on
+      aggressive custom ROMs.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_UltraBatteryMonitor
+      Live battery watchdog. It logs the health of the pack every minute and
+      automatically pushes the charge current up when the battery drops below
+      20 percent while the charger is connected.
+      group: Battery   profiles: gaming,performance,balanced,battery
+  SHADOW_WakelockTrim
+      Trims the wakelocks that keep the CPU and the sensors awake: no stay
+      awake while charging, a shorter screen timeout and a bounded GPS duty
+      cycle.
+      group: Battery   profiles: battery,balanced
+  SHADOW_WifiPowerSave
+      Switches the WiFi power save mode with your profile: off while you game
+      for zero latency, on when you only need the battery.
+      group: Battery   profiles: gaming,performance,balanced,battery
+
+CHARGE  (14 modules)
+------------------------------------------------------------------------------
+  SHADOW_ChargeACCurrent
+      Uses the full current of a wall charger while keeping the USB port
+      conservative, so the phone charges fastest from the plug.
+      group: Charge   profiles: gaming,performance,balanced
+  SHADOW_ChargeAutoResume
+      Restarts charging automatically when the charger is reconnected and re
+      applies the charge limits after every plug event.
+      group: Charge   profiles: gaming,performance,balanced,battery
+  SHADOW_ChargeBypass
+      Uses the kernel charge_control node to keep the phone running from the
+      charger without cycling the battery, which reduces heat and wear.
+      group: Charge   profiles: gaming,performance,balanced,battery
+  SHADOW_ChargeCoolDown
+      Charges cooler: reduces the current when the battery is warm so the
+      phone stays comfortable in your hand and the pack ages slower.
+      group: Charge   profiles: battery,balanced
+  SHADOW_ChargeCurrentLog
+      Records the live charge current, voltage and level to charge.log so you
+      can see the real charging speed of your charger.
+      group: Charge   profiles: gaming,performance,balanced,battery
+  SHADOW_ChargeCurrentMax
+      Raises the maximum charging current the battery accepts. The helper auto
+      detects whether the kernel expects microamps or milliamps.
+      group: Charge   profiles: gaming,performance,balanced
+  SHADOW_ChargeCycleGuard
+      Reduces the number of full charge cycles by keeping the pack in a
+      healthier 40 to 80 percent window on the battery profile.
+      group: Charge   profiles: battery,balanced
+  SHADOW_ChargeOvernightGuard
+      Stops the phone from sitting at 100 percent all night. Caps the charge
+      level overnight so the pack is not kept full and hot for eight hours.
+      group: Charge   profiles: battery,balanced
+  SHADOW_ChargeSmartCharge
+      Adaptive charging: full speed below 70 percent, then a gentle taper to
+      the last 30 percent so the battery is not stressed at the top of the
+      curve.
+      group: Charge   profiles: gaming,performance,balanced
+  SHADOW_ChargeSpeedBoost
+      Asks the charger subsystem for maximum power by lifting the USB power
+      source current limit and the charge pump frequency.
+      group: Charge   profiles: gaming,performance,balanced
+  SHADOW_ChargeThermalGuard
+      Protects the battery while charging: lowers the charging current when
+      the pack runs hot and blocks charging above a safe temperature.
+      group: Charge   profiles: battery,balanced
+  SHADOW_ChargeUSBPower
+      Keeps the USB port in fast charge mode and gives the device maximum
+      current over USB-C and the legacy USB port.
+      group: Charge   profiles: gaming,performance,balanced,battery
+  SHADOW_ChargeVoltageMax
+      Raises the charge voltage ceiling to 4.4 V so the battery fills faster
+      and reaches a higher final level.
+      group: Charge   profiles: gaming,performance,balanced
+  SHADOW_FastCharge
+      The flagship fast charging module: raises the charge current ceiling and
+      the voltage limit, removes the charging thermal cut and asks the charger
+      IC for maximum power.
+      group: Charge   profiles: gaming,performance,balanced
+
+DISPLAY  (8 modules)
+------------------------------------------------------------------------------
+  SHADOW_AdaptiveRefresh
+      Lets the panel move between 60 Hz and 120 Hz on its own, which saves
+      battery during menus and uses the full rate while you scroll.
+      group: Display   profiles: gaming,performance,balanced,battery
+  SHADOW_BlueLightFilter
+      Turns on the night light filter with a warm 4200 K colour temperature to
+      protect your eyes in the evening.
+      group: Display   profiles: gaming,performance,balanced,battery
+  SHADOW_BrightnessBoost
+      Pushes the backlight to the top of its range and raises the kernel
+      backlight ceiling, with a high quality display mode.
+      group: Display   profiles: gaming,performance,balanced,battery
+  SHADOW_ColorEnhance
+      Removes the accessibility colour filters and the washed out display
+      modes that some custom ROMs leave switched on.
+      group: Display   profiles: gaming,performance,balanced,battery
+  SHADOW_ColorGamut
+      Switches the display to the wide colour gamut and the calibrated colour
+      profile when the panel supports it.
+      group: Display   profiles: gaming,performance,balanced,battery
+  SHADOW_HighRefreshRate
+      Forces the panel to 120 Hz, the highest mode the Poco M2 Pro screen
+      supports, and removes the frame rate multiplication cap.
+      group: Display   profiles: gaming,performance,balanced
+  SHADOW_ScreenTimeout
+      Sets a 30 minute screen timeout so the display never switches off in the
+      middle of a match or a call.
+      group: Display   profiles: gaming,performance,balanced,battery
+  SHADOW_SmartBrightness
+      Restores the adaptive brightness with a faster light sensor response, so
+      the screen is readable indoors without draining the battery outdoors.
+      group: Display   profiles: gaming,performance,balanced,battery
+
+GPU  (8 modules)
+------------------------------------------------------------------------------
+  SHADOW_GPUBoh
+      Logs the Adreno busy percentage so you can see whether the GPU is the
+      bottleneck in a given game.
+      group: GPU   profiles: gaming,performance,balanced,battery
+  SHADOW_GPUForceClock
+      Forces the GPU clock, bus and rail to stay on. Costs a little battery
+      but removes GPU wake up lag completely.
+      group: GPU   profiles: gaming,performance
+  SHADOW_GPUGovernor
+      Selects the best available KGSL devfreq governor (simple_ondemand, msm-
+      adreno-tg or performance) for your kernel.
+      group: GPU   profiles: gaming,performance,balanced,battery
+  SHADOW_GPUIdleTimer
+      Shortens the GPU idle timer so the Adreno returns to full clock almost
+      instantly after a pause.
+      group: GPU   profiles: gaming,performance
+  SHADOW_GPULimit
+      Caps the GPU to a mid frequency. Use it on battery profile to get
+      roughly double the gaming time.
+      group: GPU   profiles: battery,balanced
+  SHADOW_GPUMaxFreq
+      Sets the Adreno 512 to the highest frequency the kernel exposes (up to
+      850 MHz on beryllium).
+      group: GPU   profiles: gaming,performance,balanced,battery
+  SHADOW_GPUMinPwr
+      Pins the GPU power level to 0 (fastest) so the shader never idles at a
+      low clock between frames.
+      group: GPU   profiles: gaming,performance
+  SHADOW_GPUSchedPolicy
+      Applies the Adreno scheduler policy knobs (sched_prio / sched_sigs)
+      where the kernel exposes them.
+      group: GPU   profiles: performance,gaming
+
+GAMING  (18 modules)
+------------------------------------------------------------------------------
+  SHADOW_GamingAnimSpeed
+      Snappy window, transition and animator scales (0.5x) so menus and app
+      switches feel instant without the full 1x animation stutter.
+      group: Gaming   profiles: gaming,performance,balanced
+  SHADOW_GamingAppFreeze
+      Suspends the usual battery hogs (social, streaming, shopping apps) while
+      a game is running, then wakes them back up afterwards.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingAudioLowLatency
+      Removes the fullscreen confirmation toast and keeps the audio path awake
+      so game sound starts instantly and is never muted by the system.
+      group: Gaming   profiles: gaming,performance,balanced
+  SHADOW_GamingBackgroundKiller
+      Clears cached background processes so the whole RAM is available to the
+      game. Run it right before you start a match from the action button.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingBoost
+      One tap performance boost: pins the CPU to max, unlocks the Adreno 512
+      clock and removes GPU idle. Raises average FPS and removes frame drops
+      in heavy titles.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingCPUMaxFreq
+      Locks the maximum CPU frequency to the hardware ceiling (2.2 GHz on
+      SDM660) so the SoC never downclocks under thermal or battery pressure.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingCPUMinFreq
+      Locks the minimum CPU frequency to the hardware maximum so the big cores
+      never downclock during a match. Removes the first seconds of stutter.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingFPSUnlock
+      Unlocks the display refresh rate ceiling (60/90/120 Hz) and enables
+      frame rate multiplication on ROMs that support it, so the panel can run
+      above 60 fps.
+      group: Gaming   profiles: gaming,performance,balanced
+  SHADOW_GamingGPUBoost
+      Full Adreno 512 boost: maximum GPU frequency, minimum power level 0,
+      forced GPU clock and bus, and a short idle timer for zero GPU ramp up
+      delay.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingGameList
+      Keeps your installed games in memory: protects popular game packages
+      from Doze, the app standby bucket and the low memory killer.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingGovernor
+      Selects the best available CPU governor per cluster (performance, else
+      schedutil) and logs the available governor list for later tuning.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingHaptics
+      Stronger and more responsive haptics for shooters and racing games:
+      enables haptic feedback and raises the vibration intensity where the ROM
+      exposes it.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingIOBoost
+      Storage tuning: mq-deadline scheduler, larger readahead window, faster
+      writeback and lower dirty page thresholds so textures load without
+      hitches.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingInputLatency
+      Cuts input latency: lower scheduler wakeup granularity, pointer
+      acceleration off and no pointer location overlay while gaming.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingNetBoost
+      Network tuning for competitive play: bigger TCP buffers, TCP fast open,
+      longer receive window and a low latency network namespace profile.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingRAMBoost
+      Memory tuning for 4 GB/6 GB Poco M2 Pro: bigger ZRAM, early memory
+      reclaim, tuned min_free_kbytes and a low LMK threshold so games are
+      never killed.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingStutterFix
+      Tames frame drops: per policy scheduler boost, shorter wakeup
+      granularity and a lower scheduler latency so the game thread is
+      scheduled immediately.
+      group: Gaming   profiles: gaming,performance
+  SHADOW_GamingThermalGuard
+      Raises the CPU and GPU thermal trip points to a safe gaming ceiling so
+      the phone holds peak clocks for longer before throttling.
+      group: Gaming   profiles: gaming,performance
+
+NETWORK  (12 modules)
+------------------------------------------------------------------------------
+  SHADOW_AdBlockHosts
+      Blocks advertising and tracking domains system wide by mounting a clean
+      hosts file over the system one. The original file is restored the moment
+      the module is removed.
+      group: Network   profiles: gaming,performance,balanced,battery
+  SHADOW_Conntrack
+      Enlarges the connection tracking table and shortens the timeouts so a
+      busy network never runs out of tracked connections.
+      group: Network   profiles: gaming,performance,balanced,battery
+  SHADOW_DNSCache
+      Keeps the DNS resolver warm: enables DNS over TLS, parallel lookups and
+      a longer resolver cache so names resolve instantly.
+      group: Network   profiles: gaming,performance,balanced,battery
+  SHADOW_DNSOverride
+      Points the resolver at a fast public DNS resolver with no ads and no
+      logging, for the whole system.
+      group: Network   profiles: gaming,performance,balanced,battery
+  SHADOW_MobileDataBoost
+      Turns the mobile data booster on and keeps the radio on the fastest
+      network type available for your SIM.
+      group: Network   profiles: gaming,performance,balanced,battery
+  SHADOW_NetLatency
+      Low latency networking: shorter TCP delayed ACK, larger buffers, ECN off
+      and TCP fast open so packets move with less queueing delay.
+      group: Network   profiles: gaming,performance
+  SHADOW_NetSpeedLimit
+      Removes the mobile data speed cap and the traffic shaping some custom
+      ROMs apply on the cellular interface.
+      group: Network   profiles: gaming,performance,balanced,battery
+  SHADOW_PingReduce
+      Removes the ICMP rate limit and allows pings again, so games and network
+      tools measure the real latency of your connection.
+      group: Network   profiles: gaming,performance,balanced,battery
+  SHADOW_QoSBoost
+      Gives interactive traffic a fast lane: low latency TCP, a smaller
+      congestion window and a higher socket priority.
+      group: Network   profiles: gaming,performance
+  SHADOW_TCPOptimizer
+      Full TCP tuning: receive and send windows, the connection tracking
+      table, keep alive time and the socket buffer limits.
+      group: Network   profiles: gaming,performance,balanced
+  SHADOW_Wifi5GHz
+      Prefers the 5 GHz band and keeps the radio on the fast band, which also
+      removes the 2.4 GHz interference you get in crowded places.
+      group: Network   profiles: gaming,performance,balanced,battery
+  SHADOW_WifiScanThrottle
+      Stops the WiFi radio from being throttled between scans, which restores
+      full connection speed on many custom ROMs.
+      group: Network   profiles: gaming,performance,balanced,battery
+
+PERFORMANCE  (12 modules)
+------------------------------------------------------------------------------
+  SHADOW_CPUAffinity
+      Reports the current CPU affinity and keeps the scheduler from
+      restricting the game process to the little cores.
+      group: Performance   profiles: gaming,performance,balanced,battery
+  SHADOW_CPUBoost
+      Global CPU boost: performance governor plus a hard frequency lock on
+      every cluster for maximum sustained throughput.
+      group: Performance   profiles: performance,gaming
+  SHADOW_CPUBoostConfig
+      Applies a boost configuration file and the sysfs boost switch so the
+      scheduler can request extra headroom on demand.
+      group: Performance   profiles: performance,gaming
+  SHADOW_CPUCoreOnline
+      Keeps all CPU cores online (no core parking on the little cluster) which
+      removes the wake up delay of the first interaction.
+      group: Performance   profiles: gaming,performance,balanced,battery
+  SHADOW_CPUFreqTable
+      Dumps every cluster with its frequency table, governor and limits into
+      cpu.log so you can see exactly what the SoC is doing.
+      group: Performance   profiles: gaming,performance,balanced,battery
+  SHADOW_CPUGovernor
+      Switches the CPU governor between performance, schedutil and powersave
+      from the action button without reinstalling anything.
+      group: Performance   profiles: gaming,performance,balanced,battery
+  SHADOW_CPUIdleStates
+      Trims the deep C-states and the cpuidle disable switch so the SoC reacts
+      instantly instead of sleeping for milliseconds.
+      group: Performance   profiles: performance,gaming
+  SHADOW_CPUPerfLock
+      Applies the classic performance lock used by root benchmarks: minimum
+      equals maximum frequency on every policy.
+      group: Performance   profiles: performance,gaming
+  SHADOW_CPUScalingMax
+      Sets a CPU frequency ceiling that keeps peak clocks but leaves headroom
+      for the modem and the GPS.
+      group: Performance   profiles: gaming,performance,balanced,battery
+  SHADOW_CPUScalingMin
+      Sets a guaranteed CPU frequency floor so background tasks never stall
+      the foreground app.
+      group: Performance   profiles: gaming,performance,balanced,battery
+  SHADOW_CPUSchedFeatures
+      Trims scheduler features that add latency without any visible benefit on
+      a modern kernel.
+      group: Performance   profiles: performance,gaming
+  SHADOW_CPUSmoothSwitch
+      Tunes the big.LITTLE scheduler so the workload moves to the big cores
+      faster and cluster switching stutters disappear.
+      group: Performance   profiles: gaming,performance,balanced,battery
+
+PRIVACY  (8 modules)
+------------------------------------------------------------------------------
+  SHADOW_AppOpsTrim
+      Stops every user app from silently changing your system settings behind
+      your back, while keeping the normal app behaviour untouched.
+      group: Privacy   profiles: gaming,performance,balanced,battery
+  SHADOW_ClipboardGuard
+      Turns off the clipboard history and clears the clipboard when the device
+      boots, so nothing sensitive sits in the buffer.
+      group: Privacy   profiles: gaming,performance,balanced,battery
+  SHADOW_DebloatApps
+      Disables the bloat that custom ROMs still ship, like the stock browser,
+      the stock mail client and the face editor. Everything is restored the
+      moment the module is removed.
+      group: Privacy   profiles: gaming,performance,balanced,battery
+  SHADOW_NotificationGuard
+      Removes the notification listener access from your apps, which stops
+      them from reading every notification that arrives.
+      group: Privacy   profiles: gaming,performance,balanced,battery
+  SHADOW_RootHide
+      Hides the root traces that most banking and streaming apps look for, and
+      switches the developer options back off.
+      group: Privacy   profiles: gaming,performance,balanced,battery
+  SHADOW_SensorTrim
+      Stops the rarely used sensors from keeping the sensor hub awake on the
+      battery profile, which is a real and silent battery drain.
+      group: Privacy   profiles: battery,balanced
+  SHADOW_TelemetryDisable
+      Resets the advertising id, turns off the autofill service and stops the
+      system from building a profile of you for ads.
+      group: Privacy   profiles: gaming,performance,balanced,battery
+  SHADOW_UsageStatsGuard
+      Revokes the usage access permission from your apps, so none of them can
+      read how you use your phone.
+      group: Privacy   profiles: gaming,performance,balanced,battery
+
+SYSTEM  (10 modules)
+------------------------------------------------------------------------------
+  SHADOW_AnimationSpeed
+      Speeds every system animation up so the interface reacts instantly on
+      the custom ROM.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_DarkMode
+      Forces the system wide dark theme and switches the always on dark mode
+      for every app that supports it.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_FontScale
+      Resets the font scale to the default so the system text is never broken
+      by an accidental change.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_HWOverlayOff
+      Turns off the hardware overlay for the windows, which removes the
+      ghosting you see in some custom ROMs and frees a little GPU memory.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_NotificationCleanup
+      Cleans up the notification noise: no badge dots, no bubbles and no heads
+      up pop ups while you play.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_RecentsCleanup
+      Frees the memory that the recent apps screen keeps cached, so the recent
+      list never eats into your RAM.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_ScreenshotPNG
+      Saves every screenshot as a lossless PNG instead of a compressed image,
+      which keeps the text and the UI crisp.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_SmartRotation
+      Keeps the auto rotate feature alive and the accelerometer sampling
+      smooth, so the screen follows the phone without a delay.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_SplitScreen
+      Enables split screen and freeform windows, so you can run a game and a
+      chat side by side.
+      group: System   profiles: gaming,performance,balanced,battery
+  SHADOW_StatusBarTweaks
+      Adds the battery percentage to the status bar and switches the clock to
+      the 24 hour format for a cleaner look.
+      group: System   profiles: gaming,performance,balanced,battery
+
+THERMAL  (6 modules)
+------------------------------------------------------------------------------
+  SHADOW_CoolMode
+      Cool mode profile: keeps the skin temperature ceiling low, perfect for
+      long sessions and for charging while gaming.
+      group: Thermal   profiles: battery,balanced
+  SHADOW_ThermalBalance
+      Balanced thermals: keeps the CPU below the hard throttle point while
+      still allowing the boost window for games.
+      group: Thermal   profiles: gaming,performance,balanced
+  SHADOW_ThermalConfig
+      Applies a thermal configuration profile through the kernel thermal
+      config node when the ROM exposes it.
+      group: Thermal   profiles: gaming,performance,balanced,battery
+  SHADOW_ThermalMonitor
+      Logs every thermal zone temperature to thermal.log so you can see what
+      is heating up your device.
+      group: Thermal   profiles: gaming,performance,balanced,battery
+  SHADOW_ThermalThrottleOff
+      Raises the CPU and GPU thermal trip points so the phone throttles much
+      later during long gaming sessions.
+      group: Thermal   profiles: gaming,performance
+  SHADOW_ThermalZone
+      Per zone trip point control: raises the skin and battery temperature
+      limits that trigger hard throttling.
+      group: Thermal   profiles: gaming,performance
+
+TOOLS  (12 modules)
+------------------------------------------------------------------------------
+  SHADOW_AppFreezer
+      Freezes the apps you list in /data/adb/shadow/freeze.list so they stop
+      running in the background. Everything is thawed again when the module is
+      removed.
+      group: Tools   profiles: battery,balanced
+  SHADOW_BootLoopGuard
+      The safety net of the suite. If the device fails to finish booting three
+      times in a row, the risky modules are disabled automatically and the
+      phone comes back on its own.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_BootSpeedup
+      Skips the boot animation and marks the device as provisioned, so the
+      custom ROM goes straight to the launcher.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_CleanCache
+      One tap cache cleaner. Trims the application caches and the code cache
+      without touching your personal data.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_ConfigBackup
+      Backs up the profile and the configuration of the suite to
+      /data/adb/shadow/backup so you can restore it after a reinstall.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_ControlCenter
+      The dashboard of the suite. Shows the battery, the CPU and GPU clocks,
+      the temperatures, the free memory and the state of every installed
+      Shadow module.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_LogManager
+      Keeps the Shadow logs small and readable. The log is rotated
+      automatically and can be wiped from the action button.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_PackInfo
+      Reports the installed version of the suite, the number of active Shadow
+      modules and the modules that are currently disabled.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_ProfileManager
+      The profile switcher of the suite. One tap moves the whole pack between
+      gaming, performance, balanced and battery, and every module reacts
+      instantly.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_SelinuxReport
+      Reports the SELinux state, the kernel version and the loaded security
+      modules into a file you can read at any time.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_SystemMonitor
+      A live system monitor. It samples the CPU frequency, the GPU clock, the
+      temperature and the battery into monitor.log every 5 seconds.
+      group: Tools   profiles: gaming,performance,balanced,battery
+  SHADOW_TaskManager
+      Lists the apps that are using the most memory so you can see exactly
+      what is eating your RAM.
+      group: Tools   profiles: gaming,performance,balanced,battery
+
+TOUCH  (14 modules)
+------------------------------------------------------------------------------
+  SHADOW_TouchAccuracy
+      Removes the pointer acceleration curve so the touch follows the finger
+      exactly - the same response on every screen position.
+      group: Touch   profiles: gaming,performance,balanced,battery
+  SHADOW_TouchDoubleTap
+      Enables double tap to wake and double tap to sleep where the touch IC
+      exposes the gesture, plus the secure setting used by custom ROMs.
+      group: Touch   profiles: gaming,performance,balanced,battery
+  SHADOW_TouchEnhancer
+      The main touch upgrade: raises the panel sampling rate, sharpens the
+      touch response and removes the touch explore overlay that eats taps.
+      group: Touch   profiles: gaming,performance,balanced
+  SHADOW_TouchExploreOff
+      Disables the TalkBack style touch exploration and the accessibility
+      gestures that swallow the first tap after every unlock.
+      group: Touch   profiles: gaming,performance,balanced,battery
+  SHADOW_TouchFingerTrack
+      Tightens the touch slop and the tracking window so fast swipes and quick
+      flicks register as a single, clean gesture.
+      group: Touch   profiles: gaming,performance,balanced
+  SHADOW_TouchGameRate
+      Gaming specific touch rate: the highest stable rate the panel reports,
+      ideal for shooters and moba games.
+      group: Touch   profiles: gaming,performance
+  SHADOW_TouchGhostFix
+      Kills ghost touches and phantom input caused by water, dust or a cheap
+      charger, by enabling the IC wet and anti ghost modes.
+      group: Touch   profiles: gaming,performance,balanced,battery
+  SHADOW_TouchGripGuard
+      Edge zone suppression for gaming: the left and right edge stays swipe
+      free while you hold the phone in landscape.
+      group: Touch   profiles: gaming,performance
+  SHADOW_TouchHaptics
+      Stronger and snappier haptic feedback for every tap, with the ROM level
+      vibration intensity raised to maximum.
+      group: Touch   profiles: gaming,performance,balanced
+  SHADOW_TouchHighRate
+      Pushes the touch controller to its maximum report rate (120 Hz panels
+      reach 240 Hz) for noticeably more accurate aim and scrolling.
+      group: Touch   profiles: gaming,performance,balanced
+  SHADOW_TouchMultiGesture
+      Raises the multi touch slot count of the digitiser so more fingers are
+      tracked at the same time without dropped points.
+      group: Touch   profiles: gaming,performance,balanced,battery
+  SHADOW_TouchPalmReject
+      Enables palm rejection so your palm resting on the screen no longer
+      scrolls the game or fires shots while you hold the phone.
+      group: Touch   profiles: gaming,performance,balanced
+  SHADOW_TouchStylus
+      Improves stylus (Mi Pen) support: higher stylus sampling rate and palm
+      rejection while a pen is in range.
+      group: Touch   profiles: gaming,performance,balanced,battery
+  SHADOW_TouchWaking
+      Keeps the touch controller powered for quick wake ups and shortens the
+      keyguard dismissal delay after you lift the phone.
+      group: Touch   profiles: gaming,performance,balanced,battery
+
+==============================================================================
+Made by ShadowDarkXd00
