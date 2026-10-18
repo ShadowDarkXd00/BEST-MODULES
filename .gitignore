@@ -1,0 +1,8 @@
+# Build tooling / module source stays out of the public repository.
+# Only the finished flashable ZIP and the documentation are published.
+build/
+*.pyc
+__pycache__/
+.DS_Store
+Thumbs.db
+*.log
